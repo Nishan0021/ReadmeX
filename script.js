@@ -103,7 +103,7 @@ function renderSkills() {
         <div class="skill-chip${selectedSkills.has(s.id) ? ' selected' : ''}"
              onclick="toggleSkill('${s.id}')" title="${s.label}">
           <img src="${s.img}" alt="${s.label}"
-               onerror="this.src='https://via.placeholder.com/36x36/4ade80/fff?text=${s.label[0]}'"/>
+               onerror="if(!this.dataset.retried){this.dataset.retried='1';this.src='https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/${s.id.toLowerCase()}.svg';}else{this.onerror=null;this.src='https://via.placeholder.com/36x36/6366f1/fff?text=${encodeURIComponent(s.label[0])}';}"/>
           <span>${s.label}</span>
         </div>`;
     });
@@ -153,6 +153,13 @@ function generateReadme() {
   const blog      = getVal('f-blog');
   const resume    = getVal('f-resume');
 
+  const about      = getVal('f-about');
+  const location   = getVal('f-location');
+  const opento     = getVal('f-opento');
+  const education  = getVal('f-education');
+  const achievements = getVal('f-achievements');
+  const studying   = getVal('f-studying');
+
   const visitorBadge  = document.getElementById('chk-visitor').checked;
   const twitterBadge  = document.getElementById('chk-twitter-badge').checked;
   const ghStats       = document.getElementById('chk-stats').checked;
@@ -167,6 +174,19 @@ function generateReadme() {
   if (subtitle) md += `<h3 align="center">${subtitle}</h3>\n`;
   md += '\n';
 
+  // About section
+  if (about || location || education || opento || achievements) {
+    md += `## 👤 About Me\n\n`;
+    if (about) md += `${about}\n\n`;
+    const aboutLines = [
+      location     && `- 🌍 Based in **${location}**`,
+      education    && `- 🎓 **${education}**`,
+      opento       && `- 💼 Open to **${opento}**`,
+      achievements && `- 🏆 ${achievements}`,
+    ].filter(Boolean);
+    if (aboutLines.length) md += aboutLines.join('\n') + '\n\n';
+  }
+
   if (visitorBadge && ghUser)
     md += `<p align="left"> <img src="https://komarev.com/ghpvc/?username=${ghUser}&label=Profile%20views&color=0e75b6&style=flat" alt="${ghUser}" /> </p>\n\n`;
 
@@ -174,13 +194,14 @@ function generateReadme() {
     md += `[![trophy](https://github-profile-trophy.vercel.app/?username=${ghUser})](https://github.com/ryo-ma/github-profile-trophy)\n\n`;
 
   const fields = [
-    working  && `- 🔭 I'm currently working on **${working}**`,
-    learning && `- 🌱 I'm currently learning **${learning}**`,
-    collab   && `- 👯 I'm looking to collaborate on **${collab}**`,
-    helpwith && `- 🤔 I'm looking for help with **${helpwith}**`,
-    askme    && `- 💬 Ask me about **${askme}**`,
-    reach    && `- 📫 How to reach me **${reach}**`,
-    funfact  && `- ⚡ Fun fact **${funfact}**`,
+    working   && `- 🔭 I'm currently working on **${working}**`,
+    studying  && `- 🎓 I'm currently studying **${studying}**`,
+    learning  && `- 🌱 I'm currently learning **${learning}**`,
+    collab    && `- 👯 I'm looking to collaborate on **${collab}**`,
+    helpwith  && `- 🤔 I'm looking for help with **${helpwith}**`,
+    askme     && `- 💬 Ask me about **${askme}**`,
+    reach     && `- 📫 How to reach me **${reach}**`,
+    funfact   && `- ⚡ Fun fact **${funfact}**`,
   ].filter(Boolean);
 
   if (fields.length) md += fields.join('\n') + '\n\n';
@@ -240,7 +261,8 @@ function generateReadme() {
       </div>`;
   } else {
     preview.innerHTML = renderMarkdownPreview(
-      name, subtitle, fields, socials, skillObjs,
+      name, subtitle, about, location, education, opento, achievements,
+      fields, socials, skillObjs,
       portfolio, blog, resume,
       ghUser, visitorBadge, ghStats, topLangs, streak, trophy
     );
@@ -251,7 +273,8 @@ function generateReadme() {
 }
 
 function renderMarkdownPreview(
-  name, subtitle, fields, socials, skillObjs,
+  name, subtitle, about, location, education, opento, achievements,
+  fields, socials, skillObjs,
   portfolio, blog, resume,
   ghUser, visitorBadge, ghStats, topLangs, streak, trophy
 ) {
@@ -260,6 +283,22 @@ function renderMarkdownPreview(
   if (visitorBadge && ghUser)
     html += `<br><img src="https://komarev.com/ghpvc/?username=${ghUser}&label=Profile+views&color=0e75b6&style=flat" alt="views"/>`;
   html += '</div><br>';
+
+  // About section
+  if (about || location || education || opento || achievements) {
+    html += '<h2>👤 About Me</h2>';
+    if (about) html += `<p style="color:var(--text2);line-height:1.7;margin-bottom:10px">${about}</p>`;
+    const aboutItems = [
+      location    && `🌍 Based in <strong>${location}</strong>`,
+      education   && `🎓 <strong>${education}</strong>`,
+      opento      && `💼 Open to <strong>${opento}</strong>`,
+      achievements && `🏆 ${achievements}`,
+    ].filter(Boolean);
+    if (aboutItems.length) {
+      html += '<ul>' + aboutItems.map(i => `<li style="margin:4px 0">${i}</li>`).join('') + '</ul>';
+    }
+    html += '<br>';
+  }
 
   if (fields.length) {
     html += '<ul>' +
@@ -332,19 +371,28 @@ function exportReadme() {
 
 // ===================== SAMPLE / CLEAR =====================
 function clearStep1() {
-  ['f-name','f-subtitle','f-working','f-learning','f-collab','f-helpwith','f-askme','f-reach','f-funfact']
+  ['f-name','f-subtitle','f-working','f-studying','f-learning','f-collab','f-helpwith','f-askme','f-reach','f-funfact',
+   'f-about','f-location','f-education','f-achievements']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const opento = document.getElementById('f-opento');
+  if (opento) opento.value = '';
 }
 
 function loadSample() {
-  document.getElementById('f-name').value     = 'Nishan';
-  document.getElementById('f-subtitle').value = 'Full Stack Developer | Open Source Enthusiast';
-  document.getElementById('f-working').value  = 'a MERN Stack e-commerce platform';
-  document.getElementById('f-learning').value = 'GraphQL, TypeScript and System Design';
-  document.getElementById('f-collab').value   = 'open source projects and innovative ideas';
-  document.getElementById('f-askme').value    = 'React, Node.js, and web development';
-  document.getElementById('f-reach').value    = '@example.com';
-  document.getElementById('f-funfact').value  = "I debug with console.log and I'm proud of it!";
+  document.getElementById('f-name').value        = 'Nishan';
+  document.getElementById('f-subtitle').value    = 'Full Stack Developer | Open Source Enthusiast';
+  document.getElementById('f-about').value       = "I'm a passionate full-stack developer who loves building elegant solutions to complex problems. I enjoy working with modern web technologies and contributing to open-source projects. When I'm not coding, I'm exploring new frameworks or writing tech articles.";
+  document.getElementById('f-location').value    = 'Bengaluru, India';
+  document.getElementById('f-education').value   = 'B.Tech CSE, XYZ University';
+  document.getElementById('f-opento').value      = 'full-time roles';
+  document.getElementById('f-achievements').value= 'Hackathon winner · 500+ LeetCode problems solved';
+  document.getElementById('f-working').value     = 'a MERN Stack e-commerce platform';
+  document.getElementById('f-studying').value    = 'B.Tech Computer Science';
+  document.getElementById('f-learning').value    = 'GraphQL, TypeScript and System Design';
+  document.getElementById('f-collab').value      = 'open source projects and innovative ideas';
+  document.getElementById('f-askme').value       = 'React, Node.js, and web development';
+  document.getElementById('f-reach').value       = 'nishan@example.com';
+  document.getElementById('f-funfact').value     = "I debug with console.log and I'm proud of it!";
 }
 
 function autoFill() {
