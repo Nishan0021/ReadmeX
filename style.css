@@ -408,7 +408,9 @@ input:focus, textarea:focus {
   font-size: 0.7rem; color: var(--primary); font-weight: 700;
 }
 
-.skill-chip img  { width: 36px; height: 36px; object-fit: contain; }
+.skill-chip img  { width: 36px; height: 36px; object-fit: contain; border-radius: 4px; }
+.skill-chip img[src*="jsdelivr.net/npm/simple"] { opacity: 0.75; }
+[data-theme="dark"] .skill-chip img[src*="jsdelivr.net/npm/simple"] { filter: invert(1); opacity: 0.8; }
 .skill-chip span { font-size: 0.7rem; color: var(--text2); text-align: center; font-weight: 500; }
 .skill-chip.selected span { color: var(--primary); }
 
@@ -476,4 +478,37 @@ input:focus, textarea:focus {
   .step-label, .step-sublabel { display: none; }
   .main          { padding: 0 10px 60px; }
   .card          { padding: 18px; }
+}
+
+/* ===================== NEW BADGE ===================== */
+.badge-new {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* ===================== SELECT INPUT ===================== */
+select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+  appearance: none;
+  cursor: pointer;
+}
+select:focus {
+  outline: none;
+  border-color: var(--input-focus);
 }
